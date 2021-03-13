@@ -47,6 +47,48 @@ namespace Generic.Ado.Net
             }
         }
 
+        public async Task<int> UpdateAsync(T obj, string property, object isEqual)
+        {
+            try
+            {
+                var update = command.Update(obj, property, isEqual);
+
+                await using var connection = new SqlConnection(connectionString);
+
+                var sqlCommand = CreateSqlCommand(update, obj);
+                sqlCommand.Connection = connection;
+
+                connection.Open();
+
+                var affectedRows = await sqlCommand.ExecuteNonQueryAsync();
+
+                connection.Close();
+
+                return affectedRows;
+            }
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+
+        public async Task<int> DeleteAsync(string property, object isEqual)
+        {
+            var delete = command.Delete(property, isEqual);
+            await using var connection = new SqlConnection(connectionString);
+            var sqlCommand = new SqlCommand(delete, connection)
+            {
+                Connection = connection,
+                CommandType = CommandType.Text
+            };
+            sqlCommand.Parameters.AddWithValue($"@{property}", isEqual);
+            connection.Open();
+            var affectedRows = await sqlCommand.ExecuteNonQueryAsync();
+            connection.Close();
+            return affectedRows;
+        }
+
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             try

@@ -13,10 +13,24 @@ namespace Generic.Ado.Net
             var columns = CreateColumns(properties);
             var values = CreateValues(properties);
 
-            var insert = $"INSERT INTO {nameof(Person).ToUpper()} ({columns}) VALUES ({values});";
+            var insert = $"INSERT INTO {typeof(T).Name.ToUpper()} ({columns}) VALUES ({values});";
 
             return insert;
         }
+
+        public string Update(T obj, string property, object isEqual)
+        {
+            var properties = obj.GetType().GetProperties();
+
+            var values = CreateUpdateFields(properties);
+
+            var update = $"UPDATE {typeof(T).Name.ToUpper()} SET {values} WHERE {property.ToUpper()} = {isEqual}";
+
+            return update;
+        }
+
+        public string Delete(string property, object isEqual) =>
+            $"DELETE FROM {typeof(T).Name.ToUpper()} WHERE {property} = {isEqual}";
 
         private static string CreateColumns(IEnumerable<PropertyInfo> properties)
         {
@@ -27,6 +41,12 @@ namespace Generic.Ado.Net
         private static string CreateValues(IEnumerable<PropertyInfo> properties)
         {
             var values = $"{properties.Select(x => x.Name).Aggregate("", (current, column) => current + $"@{column},")}";
+            return values.Remove(values.Length - 1);
+        }
+
+        private static string CreateUpdateFields(IEnumerable<PropertyInfo> properties)
+        {
+            var values = $"{properties.Select(x => x.Name).Aggregate("", (current, column) => current + $"{column} = @{column},")}";
             return values.Remove(values.Length - 1);
         }
     }

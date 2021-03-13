@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Generic.Ado.Net
 {
@@ -10,18 +9,24 @@ namespace Generic.Ado.Net
 
             var person = new Person
             {
-                Name = "ASDASDASDSAD",
+                Name = "Atualizado",
                 Age = 1023
             };
 
             var repo = new Repository<Person>(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Person;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
-            //var affectedRows = await repo.InsertAsync(person);
-            var persons = await repo.GetAllAsync();
+            ////var affectedRows = await repo.InsertAsync(person);
+            //var persons = await repo.GetAllAsync();
 
-            foreach (var person1 in persons)
-            {
-                Console.WriteLine(person1.Name);
-            }
+            //foreach (var person1 in persons)
+            //{
+            //    Console.WriteLine(person1.Name);
+            //}
+
+
+            var command = new Command<Person>();
+
+            await repo.DeleteAsync("Id", 1);
+
         }
     }
 
