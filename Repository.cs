@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,25 +47,25 @@ namespace Generic.Ado.Net
             }
         }
 
-        public IEnumerable<T> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
             try
             {
                 var query = queries.SelectAll();
 
-                using var connection = new SqlConnection(connectionString);
+                await using var connection = new SqlConnection(connectionString);
 
                 var sqlCommand = new SqlCommand(query, connection) { Connection = connection, CommandType = CommandType.Text };
 
                 connection.Open();
 
-                using var sqlDataReader = sqlCommand.ExecuteReader();
+                await using var sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
                 var objects = ReadItems(sqlDataReader);
 
                 connection.Close();
 
-                return objects;
+                return await objects;
             }
             catch (SqlException e)
             {
@@ -72,11 +73,11 @@ namespace Generic.Ado.Net
             }
         }
 
-        private static IEnumerable<T> ReadItems(SqlDataReader dataReader)
+        private static async Task<IEnumerable<T>> ReadItems(DbDataReader dataReader)
         {
             var list = new List<T>();
 
-            while (dataReader.Read())
+            while (await dataReader.ReadAsync())
             {
                 var obj = Activator.CreateInstance<T>();
                 for (var i = 0; i < dataReader.FieldCount; i++)
