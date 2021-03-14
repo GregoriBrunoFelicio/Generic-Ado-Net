@@ -115,6 +115,33 @@ namespace Generic.Ado.Net
             }
         }
 
+        public async Task<T> GetByIdAsync(int id)
+        {
+            try
+            {
+                var query = queries.GetById(id);
+
+                await using var connection = new SqlConnection(connectionString);
+
+                var sqlCommand = new SqlCommand(query, connection) { Connection = connection, CommandType = CommandType.Text };
+
+                connection.Open();
+
+                await using var sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+
+                var obj = ReadItems(sqlDataReader);
+
+                connection.Close();
+
+                return (await obj).FirstOrDefault();
+            }
+            catch (SqlException e)
+            {
+                throw new Exception(e.Message);
+            }
+
+        }
+
         private static async Task<IEnumerable<T>> ReadItems(DbDataReader dataReader)
         {
             var list = new List<T>();

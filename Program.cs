@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Generic.Ado.Net
 {
@@ -23,9 +24,11 @@ namespace Generic.Ado.Net
             //}
 
 
-            var command = new Command<Person>();
+            //var command = new Command<Person>();
 
-            await repo.DeleteAsync("Id", 1);
+            var a = await repo.GetByIdAsync(3);
+
+            Console.WriteLine(a.Name);
 
         }
     }
